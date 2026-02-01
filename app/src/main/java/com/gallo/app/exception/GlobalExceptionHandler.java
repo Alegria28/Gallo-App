@@ -20,4 +20,13 @@ public class GlobalExceptionHandler {
         // Devolvemos una respuesta personalizada
         return ResponseEntity.status(HttpStatus.CONFLICT).body(respuesta);
     }
+
+    @ExceptionHandler(CorreoInvalidoException.class)
+    public ResponseEntity<Map<String, String>> manejarCorreoInvalido(CorreoInvalidoException ex) {
+        Map<String, String> respuesta = new HashMap<>();
+        respuesta.put("mensaje", ex.getMessage());
+
+        // Devolvemos una respuesta personalizada
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(respuesta);
+    }
 }

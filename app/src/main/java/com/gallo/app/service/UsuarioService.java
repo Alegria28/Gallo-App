@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.gallo.app.entity.Usuario;
+import com.gallo.app.exception.CorreoInvalidoException;
 import com.gallo.app.exception.CorreoYaExisteException;
 import com.gallo.app.repository.UsuarioRepository;
 
@@ -21,10 +22,15 @@ public class UsuarioService {
 
     public Usuario registrarUsuario(String nombre, String correo, String contra) {
 
+        // Verificamos si el correo es valido
+        if (!correo.matches("^al\\d{6}@edu\\.uaa\\.mx$")){
+            throw new CorreoInvalidoException("Correo invalido");
+        }
+
         // Verificamos si ya existe este correo
         if (usuarioRepository.existsByCorreo(correo)) {
             // Si este existe, lanzamos nuestra excepcion
-            throw new CorreoYaExisteException("El correo ya esta registrado");
+            throw new CorreoYaExisteException("Correo ya registrado");
         }
 
         Usuario nuevoUsuario = new Usuario();
