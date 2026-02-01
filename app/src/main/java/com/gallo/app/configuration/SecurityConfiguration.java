@@ -25,7 +25,7 @@ public class SecurityConfiguration {
                 // Configuracion permisos de las rutas
                 .authorizeHttpRequests(authorize -> authorize
                         // Cualquiera se puede registrar
-                        .requestMatchers("/api/usuario/registrar").permitAll()
+                        .requestMatchers("/api/auth/registrar").permitAll()
                         // Las otras rutas requieren todavia de autenticacion
                         .anyRequest().authenticated())
                 .build();
