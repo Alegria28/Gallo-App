@@ -41,8 +41,8 @@ public class SecurityConfiguration {
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 // Configuracion permisos de las rutas
                 .authorizeHttpRequests(authorize -> authorize
-                        // Cualquiera se puede registrar
-                        .requestMatchers("/api/auth/registrar").permitAll()
+                        // Cualquiera puede acceder a estos endpoints
+                        .requestMatchers("/api/auth/**").permitAll()
                         // Las otras rutas requieren todavia de autenticacion
                         .anyRequest().authenticated())
                 // Servidor stateless

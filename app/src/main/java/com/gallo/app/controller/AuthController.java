@@ -6,13 +6,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gallo.app.entity.Usuario;
 import com.gallo.app.service.AuthService;
 
+import lombok.Data;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-// Para los mapping y los HttpStatus
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("api/auth") // Ruta base
@@ -37,6 +39,25 @@ public class AuthController {
         respuesta.put("mensaje", "Usuario creado");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
+    }
+
+    @PostMapping("/iniciar-sesion")
+    public ResponseEntity<Map<String, String>> iniciarSesion(@RequestBody DatosIniciarSesion datosIniciarSesion) {
+
+        // Llamamos al metodo para iniciar sesion
+        String token = authService.iniciarSesion(datosIniciarSesion.getCorreo(), datosIniciarSesion.getContra());
+
+        Map<String, String> respuesta = new HashMap<>();
+        respuesta.put("token", token);
+        respuesta.put("mensaje", "Autenticacion valida");
+
+        return ResponseEntity.status(HttpStatus.OK).body(respuesta);
+    }
+
+    @Data
+    public static class DatosIniciarSesion {
+        private String correo;
+        private String contra;
     }
 
 }
