@@ -37,8 +37,21 @@ public class JwtUtil {
         return token;
     }
 
+    public String generarTokenVerificacion(String correo) {
+
+        // Generamos el token
+        String token = Jwts.builder()
+                .subject(correo)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000)) // 10 minutos
+                .signWith(obtenerKey())
+                .compact();
+
+        // Regresamos el token
+        return token;
+    }
+
     public boolean validarToken(String token) {
-        // Lo validamos
         try {
             Jwts.parser().verifyWith(obtenerKey()).build().parseSignedClaims(token);
             return true;
@@ -50,6 +63,11 @@ public class JwtUtil {
 
     public Claims obtenerClaimsToken(String token) {
         return Jwts.parser().verifyWith(obtenerKey()).build().parseSignedClaims(token).getPayload();
+    }
+
+    public String obtenerCorreoToken(String token) {
+        Claims claims = Jwts.parser().verifyWith(obtenerKey()).build().parseSignedClaims(token).getPayload();
+        return claims.getSubject();
     }
 
     private SecretKey obtenerKey() {

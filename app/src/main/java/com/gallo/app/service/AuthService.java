@@ -20,12 +20,15 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final EmailService emailService;
 
-    public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
+            EmailService emailService) {
         // Inyeccion por constructor
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.emailService = emailService;
     }
 
     public void registrarUsuario(String nombre, String correo, String contra) {
@@ -57,23 +60,34 @@ public class AuthService {
     public String iniciarSesion(String correo, String contra) {
 
         // Verificamos si existe algun usuario con ese correo
-        Optional<Usuario> usuario = usuarioRepository.findByCorreo(correo);
+        Optional<Usuario> usuarioEncontado = usuarioRepository.findByCorreo(correo);
 
         // Verificamos si nuestro Optional tiene un Usuario
-        if (usuario.isPresent()) {
+        if (usuarioEncontado.isPresent()) {
 
             // Si llegamos aqui es porque si hay un usuario
-            Usuario usuarioEncontrado = usuario.get();
+            Usuario usuario = usuarioEncontado.get();
 
             // Verificamos que la contraseña sea correcta
-            if (passwordEncoder.matches(contra, usuarioEncontrado.getContra())) {
-                // Dado que es la contraseña correcta, creamos un JWT
-                String token = jwtUtil.generarToken(new UserDetails(usuarioEncontrado.getId(),
-                        usuarioEncontrado.getNombre(),
-                        usuarioEncontrado.getCorreo(), usuarioEncontrado.isVerificado(), usuarioEncontrado.getRol()));
+            if (passwordEncoder.matches(contra, usuario.getContra())) {
 
-                // Retornamos el token
-                return token;
+                // Verificamos si el usuario esta verificado
+                if (!usuario.isVerificado()) {
+
+                    // Si el usuario no esta verificado mandamos el correo y generamos el token con el correo como subject
+                    emailService.codigoVerificacion(correo, jwtUtil.generarTokenVerificacion(correo));
+
+                    throw new AuthException("Cuenta no verificada: Revisa tu correo institucional");
+                } else {
+                    // Dado que es la contraseña correcta y la cuenta esta verificada, creamos un JWT
+                    String token = jwtUtil.generarToken(new UserDetails(usuario.getId(),
+                            usuario.getNombre(),
+                            usuario.getCorreo(), usuario.isVerificado(),
+                            usuario.getRol()));
+
+                    // Retornamos el token
+                    return token;
+                }
 
             }
 
@@ -83,5 +97,24 @@ public class AuthService {
 
         // Si no existe, mandamos el exception
         throw new AuthException("Correo o contraseña incorrectos");
+    }
+
+    public void verificarCuenta(String token) {
+
+        if (!jwtUtil.validarToken(token)) {
+            throw new AuthException("Token invalido o expirado");
+        }
+
+        // Obtenemos el correo del usuario
+        String correoUsuario = jwtUtil.obtenerCorreoToken(token);
+
+        // Obtenemos al usuario
+        Optional<Usuario> usuarioEncontrado = usuarioRepository.findByCorreo(correoUsuario);
+        Usuario usuario = usuarioEncontrado.get();
+
+        // El usuario ya esta verificado
+        usuario.setVerificado(true);
+        // Lo guardamos
+        usuarioRepository.save(usuario);
     }
 }

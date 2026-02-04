@@ -1,6 +1,6 @@
 package com.gallo.app.exception;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CorreoYaExisteException.class)
     private ResponseEntity<Map<String, String>> manejarCorreoYaExiste(CorreoYaExisteException ex) {
 
-        Map<String, String> respuesta = new HashMap<>();
+        Map<String, String> respuesta = new LinkedHashMap<>();
         respuesta.put("mensaje", ex.getMessage());
 
         // Devolvemos una respuesta personalizada
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CorreoInvalidoException.class)
     private ResponseEntity<Map<String, String>> manejarCorreoInvalido(CorreoInvalidoException ex) {
-        Map<String, String> respuesta = new HashMap<>();
+        Map<String, String> respuesta = new LinkedHashMap<>();
         respuesta.put("mensaje", ex.getMessage());
 
         // Devolvemos una respuesta personalizada
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthException.class)
     private ResponseEntity<Map<String, String>> manejarAuth(AuthException ex) {
-        Map<String, String> respuesta = new HashMap<>();
+        Map<String, String> respuesta = new LinkedHashMap<>();
         respuesta.put("mensaje", ex.getMessage());
 
         // Devolvemos una respuesta personalizada

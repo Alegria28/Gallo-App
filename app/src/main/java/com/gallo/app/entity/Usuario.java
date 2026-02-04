@@ -42,10 +42,6 @@ public class Usuario {
     @NotBlank
     private String contra;
 
-    private String codigoVerificacion;
-
-    private LocalDateTime fechaExpiracionCodigo;
-
     private boolean verificado = false;
 
     @CreationTimestamp
