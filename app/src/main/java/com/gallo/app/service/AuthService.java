@@ -4,6 +4,9 @@ import java.util.Optional;
 
 import com.gallo.app.util.JwtUtil;
 import com.gallo.app.util.UserDetails;
+import com.gallo.app.util.JwtUtil.Tipo;
+
+import io.jsonwebtoken.Claims;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -75,15 +78,14 @@ public class AuthService {
                 if (!usuario.isVerificado()) {
 
                     // Si el usuario no esta verificado mandamos el correo y generamos el token con el correo como subject
-                    emailService.codigoVerificacion(correo, jwtUtil.generarTokenVerificacion(correo));
+                    emailService.solicitarTokenVerificacion(correo,
+                            jwtUtil.generarTokenTemporal(correo, Tipo.VERIFICAR));
 
                     throw new AuthException("Cuenta no verificada: Revisa tu correo institucional");
                 } else {
                     // Dado que es la contraseña correcta y la cuenta esta verificada, creamos un JWT
-                    String token = jwtUtil.generarToken(new UserDetails(usuario.getId(),
-                            usuario.getNombre(),
-                            usuario.getCorreo(), usuario.isVerificado(),
-                            usuario.getRol()));
+                    String token = jwtUtil.generarToken(new UserDetails(usuario.getId(), usuario.getNombre(),
+                            usuario.getCorreo(), usuario.isVerificado(), usuario.getRol()));
 
                     // Retornamos el token
                     return token;
@@ -101,19 +103,51 @@ public class AuthService {
 
     public void verificarCuenta(String token) {
 
-        if (!jwtUtil.validarToken(token)) {
+        if (!jwtUtil.validarTokenTipo(token, Tipo.VERIFICAR)) {
             throw new AuthException("Token invalido o expirado");
         }
 
-        // Obtenemos el correo del usuario
-        String correoUsuario = jwtUtil.obtenerCorreoToken(token);
+        // Obtenemos los claims del token
+        Claims claims = jwtUtil.obtenerClaimsToken(token);
 
         // Obtenemos al usuario
-        Optional<Usuario> usuarioEncontrado = usuarioRepository.findByCorreo(correoUsuario);
+        Optional<Usuario> usuarioEncontrado = usuarioRepository.findByCorreo(claims.getSubject());
         Usuario usuario = usuarioEncontrado.get();
 
         // El usuario ya esta verificado
         usuario.setVerificado(true);
+        // Lo guardamos
+        usuarioRepository.save(usuario);
+
+    }
+
+    public void solicitarRestablecerContra(String correo) {
+
+        // Enviamos correo para restablecer contra
+        emailService.solicitarRestablecerContra(correo, jwtUtil.generarTokenTemporal(correo, Tipo.RESTABLECER));
+
+    }
+
+    public void restablecerContra(String token, String contra) {
+
+        // Validamos el token
+        if (!jwtUtil.validarTokenTipo(token, Tipo.RESTABLECER)) {
+            throw new AuthException("Token invalido o expirado");
+        }
+
+        // Obtenemos los claims del token
+        Claims claims = jwtUtil.obtenerClaimsToken(token);
+
+        // Obtenemos al usuario
+        Optional<Usuario> usuarioEncontrado = usuarioRepository.findByCorreo(claims.getSubject());
+
+        Usuario usuario = usuarioEncontrado.get();
+
+        // Hasheamos la contraseña
+        String contraHasheada = passwordEncoder.encode(contra);
+        // Le cambiamos la contraseña al usuario
+        usuario.setContra(contraHasheada);
+
         // Lo guardamos
         usuarioRepository.save(usuario);
     }

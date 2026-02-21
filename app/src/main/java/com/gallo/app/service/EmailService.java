@@ -22,7 +22,7 @@ public class EmailService {
         this.javaMailSender = javaMailSender;
     }
 
-    public void codigoVerificacion(String para, String token) {
+    public void solicitarTokenVerificacion(String para, String token) {
 
         SimpleMailMessage email = new SimpleMailMessage();
         email.setTo(para);
@@ -34,6 +34,26 @@ public class EmailService {
 
         email.setText("Bienvenido a Gallo App\n\n" +
                 "Haz clic en el siguiente enlace para verificar tu cuenta:\n" +
+                urlVerificacion + "\n\n" +
+                "Este enlace expirará en 10 minutos.\n\n" +
+                "Si no solicitaste este código, ignora este mensaje.");
+
+        // Enviamos el correo
+        javaMailSender.send(email);
+    }
+
+    public void solicitarRestablecerContra(String para, String token) {
+
+        SimpleMailMessage email = new SimpleMailMessage();
+        email.setTo(para);
+        email.setSubject("Gallo App - Restablecer contraseña");
+        email.setFrom(de);
+
+        //! URL del frontend para restablecer contraseña
+        String urlVerificacion = token;
+
+        email.setText("Bienvenido a Gallo App\n\n" +
+                "Haz clic en el siguiente enlace para restablecer tu contraseña:\n" +
                 urlVerificacion + "\n\n" +
                 "Este enlace expirará en 10 minutos.\n\n" +
                 "Si no solicitaste este código, ignora este mensaje.");

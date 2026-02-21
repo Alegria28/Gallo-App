@@ -4,11 +4,11 @@
             "type": "java",
             "name": "Spring Boot-AppApplication<app>",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/app",
             "mainClass": "com.gallo.app.AppApplication",
             "projectName": "app",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/app/.env"
         }
     ]
 }

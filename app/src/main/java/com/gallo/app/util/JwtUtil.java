@@ -25,6 +25,7 @@ public class JwtUtil {
         //! Configurar token con expiracion
         String token = Jwts.builder()
                 .subject(userDetails.getId().toString())
+                .claim("tipo", Tipo.SESION)
                 .claim("nombre", userDetails.getNombre())
                 .claim("correo", userDetails.getCorreo())
                 .claim("verificado", userDetails.isVerificado())
@@ -37,11 +38,17 @@ public class JwtUtil {
         return token;
     }
 
-    public String generarTokenVerificacion(String correo) {
+    // Para saber que tipo de tokens hay
+    public enum Tipo {
+        SESION, VERIFICAR, RESTABLECER
+    }
+
+    public String generarTokenTemporal(String correo, Tipo tipo) {
 
         // Generamos el token
         String token = Jwts.builder()
                 .subject(correo)
+                .claim("tipo", tipo)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000)) // 10 minutos
                 .signWith(obtenerKey())
@@ -56,18 +63,25 @@ public class JwtUtil {
             Jwts.parser().verifyWith(obtenerKey()).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
-            // El token es invalido
+            return false;
+        }
+    }
+
+    public boolean validarTokenTipo(String token, Tipo tipo) {
+        try {
+            Claims claims = obtenerClaimsToken(token);
+
+            // Verificamos que el tipo de token sea el esperado
+            String tipoToken = claims.get("tipo", String.class);
+            return tipoToken != null && tipoToken.equals(tipo.name());
+        } catch (Exception e) {
             return false;
         }
     }
 
     public Claims obtenerClaimsToken(String token) {
+        // Ademas de obtener los claims, esto valida el token, solo el getPayload() retorna los claims
         return Jwts.parser().verifyWith(obtenerKey()).build().parseSignedClaims(token).getPayload();
-    }
-
-    public String obtenerCorreoToken(String token) {
-        Claims claims = Jwts.parser().verifyWith(obtenerKey()).build().parseSignedClaims(token).getPayload();
-        return claims.getSubject();
     }
 
     private SecretKey obtenerKey() {

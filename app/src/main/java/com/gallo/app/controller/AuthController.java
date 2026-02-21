@@ -55,15 +55,43 @@ public class AuthController {
     }
 
     @PostMapping("/verificarCuenta")
-    public ResponseEntity<Map<String, String>> verificarCuenta(@RequestBody TokenVerificacion tokenVerificacion) {
+    public ResponseEntity<Map<String, String>> verificarCuenta(@RequestBody DatosVerificarCuenta datosVerificarCuenta) {
 
         // Llamamos al metodo
-        authService.verificarCuenta(tokenVerificacion.getToken());
+        authService.verificarCuenta(datosVerificarCuenta.getToken());
 
         Map<String, String> respuesta = new LinkedHashMap<>();
         respuesta.put("mensaje", "Cuenta verificada");
 
         return ResponseEntity.status(HttpStatus.OK).body(respuesta);
+    }
+
+    @PostMapping("/solicitarRestablecerContra")
+    public ResponseEntity<Map<String, String>> restablecerContra(
+            @RequestBody DatosSolicitarRestablecerContra datosRestablecerContra) {
+
+        // Llamamos al metodo
+        authService.solicitarRestablecerContra(datosRestablecerContra.getCorreo());
+
+        // Mandamos la respuesta respectiva
+        Map<String, String> mensaje = new LinkedHashMap<>();
+        mensaje.put("mensaje", "Correo enviado para restablecer contraseña");
+
+        return ResponseEntity.status(HttpStatus.OK).body(mensaje);
+    }
+
+    @PostMapping("/restablecerContra")
+    public ResponseEntity<Map<String, String>> restablecerContra(
+            @RequestBody DatosRestablecerContra datosRestablecerContra) {
+
+        // Llamamos al metodo
+        authService.restablecerContra(datosRestablecerContra.getToken(),
+                datosRestablecerContra.getContra());
+
+        Map<String, String> mensaje = new LinkedHashMap<>();
+        mensaje.put("mensaje", "Contraseña restablecida");
+
+        return ResponseEntity.status(HttpStatus.OK).body(mensaje);
     }
 
     @Data
@@ -73,8 +101,19 @@ public class AuthController {
     }
 
     @Data
-    private static class TokenVerificacion {
+    private static class DatosVerificarCuenta {
         private String token;
+    }
+
+    @Data
+    private static class DatosRestablecerContra {
+        private String token;
+        private String contra;
+    }
+
+    @Data
+    private static class DatosSolicitarRestablecerContra {
+        private String correo;
     }
 
 }
