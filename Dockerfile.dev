@@ -1,0 +1,14 @@
+# Imagen de JDK (21) en alpine
+FROM amazoncorretto:21-alpine
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Exponemos el puerto (segun como esta configurado la aplicacion de spring boot)
+EXPOSE 8081
+
+# Copiamos el proyecto al contenedor (usando el .dockerignore para evitar copiar archivos innecesarios)
+COPY ./app .
+
+# Ejecutamos la aplicacion
+CMD ["./mvnw", "spring-boot:run"]

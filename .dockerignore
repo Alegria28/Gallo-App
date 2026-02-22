@@ -1,0 +1,20 @@
+# Archivos que docker ignora al momento de cargar el contexto
+# Editores
+.editorconfig
+.vscode
+# Git
+.git
+.gitignore
+# Documentacion
+IA.MD
+README.md
+# Docker
+docker-compose.yml
+Dockerfile.dev
+# Build
+app/target/
+# Variables de entorno
+.env
+app/.env
+# Utilidades
+Makefile

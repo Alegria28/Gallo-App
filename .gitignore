@@ -1,5 +1,8 @@
+# Documentacion
+README.md
+
 # Tutor
 IA.md
 
-# Proyecto
-.env
+# Variables de entorno
+*.env
