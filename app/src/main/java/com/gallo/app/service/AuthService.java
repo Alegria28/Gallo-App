@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.gallo.app.entity.Usuario;
+import com.gallo.app.entity.UsuarioDetalle;
 import com.gallo.app.exception.AuthException;
 import com.gallo.app.exception.CorreoInvalidoException;
 import com.gallo.app.exception.CorreoYaExisteException;
@@ -47,15 +48,22 @@ public class AuthService {
             throw new CorreoYaExisteException("Correo ya registrado");
         }
 
+        // Creamos las entidades
+        UsuarioDetalle usuarioDetalle = new UsuarioDetalle();
+        usuarioDetalle.setNombre(nombre);
+
         Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.setNombre(nombre);
         nuevoUsuario.setCorreo(correo);
 
         // Hasheamos la contraseña
         String contraHasheada = passwordEncoder.encode(contra);
         nuevoUsuario.setContra(contraHasheada);
 
-        // Guardamos al usuario
+        // Establecemos relacion bidireccional
+        nuevoUsuario.setUsuarioDetalle(usuarioDetalle);
+        usuarioDetalle.setUsuario(nuevoUsuario);
+
+        // Guardamos al usuario (gracias al cascade, solo debemos guardar el usuario)
         usuarioRepository.save(nuevoUsuario);
 
     }
@@ -74,8 +82,11 @@ public class AuthService {
             // Verificamos que la contraseña sea correcta
             if (passwordEncoder.matches(contra, usuario.getContra())) {
 
+                // Obtenemos el detalle del usuario para verificar si esta verificado
+                UsuarioDetalle usuarioDetalle = usuario.getUsuarioDetalle();
+
                 // Verificamos si el usuario esta verificado
-                if (!usuario.isVerificado()) {
+                if (!usuarioDetalle.isVerificado()) {
 
                     // Si el usuario no esta verificado mandamos el correo y generamos el token con el correo como subject
                     emailService.solicitarTokenVerificacion(correo,
@@ -84,8 +95,9 @@ public class AuthService {
                     throw new AuthException("Cuenta no verificada: Revisa tu correo institucional");
                 } else {
                     // Dado que es la contraseña correcta y la cuenta esta verificada, creamos un JWT
-                    String token = jwtUtil.generarToken(new UserDetails(usuario.getId(), usuario.getNombre(),
-                            usuario.getCorreo(), usuario.isVerificado(), usuario.getRol()));
+                    String token = jwtUtil.generarToken(
+                            new UserDetails(usuario.getIdUsuario(), usuario.getUsuarioDetalle().getNombre(),
+                                    usuario.getCorreo(), usuario.getUsuarioDetalle().isVerificado(), usuario.getRol()));
 
                     // Retornamos el token
                     return token;
@@ -114,8 +126,11 @@ public class AuthService {
         Optional<Usuario> usuarioEncontrado = usuarioRepository.findByCorreo(claims.getSubject());
         Usuario usuario = usuarioEncontrado.get();
 
+        // Obtenemos el detalle del usuario para verificar si esta verificado
+        UsuarioDetalle usuarioDetalle = usuario.getUsuarioDetalle();
+
         // El usuario ya esta verificado
-        usuario.setVerificado(true);
+        usuarioDetalle.setVerificado(true);
         // Lo guardamos
         usuarioRepository.save(usuario);
 

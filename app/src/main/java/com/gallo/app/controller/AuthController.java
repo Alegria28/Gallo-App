@@ -3,7 +3,6 @@ package com.gallo.app.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gallo.app.entity.Usuario;
 import com.gallo.app.service.AuthService;
 
 import lombok.Data;
@@ -30,10 +29,12 @@ public class AuthController {
     // -------- Rutas --------
 
     @PostMapping("/registrar")
-    public ResponseEntity<Map<String, String>> registrarUsuario(@RequestBody Usuario usuario) {
+    public ResponseEntity<Map<String, String>> registrarUsuario(
+            @RequestBody DatosRegistrarUsuario datosRegistrarUsuario) {
 
         // Llamamos al metodo del servicio para guardar al usuario
-        authService.registrarUsuario(usuario.getNombre(), usuario.getCorreo(), usuario.getContra());
+        authService.registrarUsuario(datosRegistrarUsuario.getNombre(), datosRegistrarUsuario.getCorreo(),
+                datosRegistrarUsuario.getContra());
 
         Map<String, String> respuesta = new LinkedHashMap<>();
         respuesta.put("mensaje", "Usuario creado: Revisa tu correo institucional para verificar la cuenta");
@@ -92,6 +93,13 @@ public class AuthController {
         mensaje.put("mensaje", "Contraseña restablecida");
 
         return ResponseEntity.status(HttpStatus.OK).body(mensaje);
+    }
+
+    @Data
+    private static class DatosRegistrarUsuario {
+        private String nombre;
+        private String correo;
+        private String contra;
     }
 
     @Data
