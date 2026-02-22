@@ -43,6 +43,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         // Cualquiera puede acceder a estos endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/health/**").permitAll()
                         // Las otras rutas requieren todavia de autenticacion
                         .anyRequest().authenticated())
                 // Servidor stateless
@@ -54,7 +55,7 @@ public class SecurityConfiguration {
     private CorsConfigurationSource configuracionCors() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        // Origenes permitidos 
+        // Origenes permitidos
         //! Importante cambiar
         corsConfiguration.setAllowedOrigins(List.of("*"));
 
