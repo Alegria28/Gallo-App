@@ -2,6 +2,8 @@ package com.gallo.app.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
 
@@ -21,6 +23,15 @@ public class JwtUtil {
 
     public String generarToken(UserDetails userDetails) {
 
+        // Extraemos los roles, pasando el Set<Rol> a una lista
+        // - stream() Convierte el Set<Rol> a un flujo de datos
+        // - map() Transforma cada Rol extrayendo el nombre del enum
+        // - name() Convierte el enum a String
+        // - collect() Recolecta todo en una List<String>
+        // Similar al .map() de JS pero este necesita el .stream() para primero, ademas de que necesita el .collect() para retornar explicitamente lo que queremos
+        List<String> rolesNombres = userDetails.getRoles().stream().map(rol -> rol.getNombre().name())
+                .collect(Collectors.toList());
+
         // Generamos el token
         //! Configurar token con expiracion
         String token = Jwts.builder()
@@ -29,7 +40,7 @@ public class JwtUtil {
                 .claim("nombre", userDetails.getNombre())
                 .claim("correo", userDetails.getCorreo())
                 .claim("verificado", userDetails.isVerificado())
-                .claim("rol", userDetails.getRol().toString())
+                .claim("roles", rolesNombres)
                 .issuedAt(new Date())
                 .signWith(obtenerKey())
                 .compact();

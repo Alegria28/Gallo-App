@@ -3,8 +3,6 @@ package com.gallo.app.entity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,11 +41,4 @@ public class Usuario {
     // Entidad propietaria de la relacion, se crea una columna usuario_detalles_id en la tabla usuario
     @JoinColumn(name = "usuario_detalles_id", referencedColumnName = "idUsuarioDetalle")
     private UsuarioDetalle usuarioDetalle;
-
-    @Enumerated(EnumType.STRING)
-    private Rol rol = Rol.ESTUDIANTE;
-
-    public enum Rol {
-        ESTUDIANTE, ADMIN
-    }
 }

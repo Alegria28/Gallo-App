@@ -97,7 +97,8 @@ public class AuthService {
                     // Dado que es la contraseña correcta y la cuenta esta verificada, creamos un JWT
                     String token = jwtUtil.generarToken(
                             new UserDetails(usuario.getIdUsuario(), usuario.getUsuarioDetalle().getNombre(),
-                                    usuario.getCorreo(), usuario.getUsuarioDetalle().isVerificado(), usuario.getRol()));
+                                    usuario.getCorreo(), usuario.getUsuarioDetalle().isVerificado(),
+                                    usuario.getUsuarioDetalle().getRoles()));
 
                     // Retornamos el token
                     return token;
