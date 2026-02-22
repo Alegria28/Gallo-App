@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -50,5 +51,10 @@ public class UsuarioDetalle {
     @JoinTable(name = "usuariodetalle_rol", joinColumns = @JoinColumn(name = "idUsuarioDetalle"), inverseJoinColumns = @JoinColumn(name = "idRol"))
     // Guardar los roles que puede tener un usuario (sin repetir)
     private Set<Rol> roles = new HashSet<>();
+
+    // Relacion n:1 con Carrera
+    @ManyToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinColumn(name = "idCarrera")
+    private Carrera carrera;
 
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
@@ -40,5 +41,7 @@ public class Usuario {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     // Entidad propietaria de la relacion, se crea una columna usuario_detalles_id en la tabla usuario
     @JoinColumn(name = "usuario_detalles_id", referencedColumnName = "idUsuarioDetalle")
+    // Para compartir una llave primaria entre 2 entidades
+    @MapsId
     private UsuarioDetalle usuarioDetalle;
 }
